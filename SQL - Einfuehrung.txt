@@ -1,3 +1,4 @@
+
 Select 				 leg fest, welche Spalte das Ergenistabelle haben soll
 FROM				Bestimmt, aus welchem Datenquellen mit welchen Verknuepfungen die Daten geholt werden sollen
 Where				Filtert unerwuensche Daten raus
