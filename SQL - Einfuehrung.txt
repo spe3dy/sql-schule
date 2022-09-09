@@ -1,0 +1,176 @@
+Select 				 leg fest, welche Spalte das Ergenistabelle haben soll
+FROM				Bestimmt, aus welchem Datenquellen mit welchen Verknuepfungen die Daten geholt werden sollen
+Where				Filtert unerwuensche Daten raus
+ORDER BY				Sortieren der Ergebnismengen nach einer oder mehreren Salten aufsteigend / absteigend
+Group BY				Fasst Zeilen mit gemeinsamen Spalten zusammen
+Having				Filtert unerwuenschte Gruppen heraus
+
+
+
+
+
+
+Regel :  Alle Spalten, welche im SELECT - Zweig gesetzt werden, muessen sich in den Datenquellen im FROM-Zweig finden lassen
+
+SELECT TabellA.spalteA, spalteB, ….
+
+
+	-> Doppelte Werde im SELECT-Zweig verbieten : 
+	
+	-> Aliass: Diene nder Bennenung den Spalten in der Ergebnismenge ODER  der Benennung von temopraeren Tabellen 
+	
+		SELECT COUNT(KundenID) AS AnzahlKunden, Kunden.Name
+		FROM ---
+	
+	-> Anmerkung: Das Schluesselwort AS kann fuer Aliase fasst immer auch weggelassen werden
+	
+	
+	Der FROM-Zweig:
+	
+		-> Welche Typen von Tabellen/Datenquellen kann man hier benutzen?
+		
+		- permanente Tabellen(die selbst per CREATE TABLE angelegten Tabellen)
+		- Temporaere Tabellen(Ergebnistabellen, welche von Unterabfragen zurueckgegeben werden)
+		- Virtuelle Tabellen(mit CREATE VIEW angelegte Tabellen)
+	
+	-> Kreuzprodukte:
+	
+		SELECT * 
+		FROM Assistenten, Professoren
+		
+			 -> Ergebnis: Jeder Zeit aus Assistenten wird mir jeder Zeie aus Professoren einmal kombiniert und so als Tabelle zurueckgegeben!
+			
+			
+	BEISPIEL:
+	
+		USE Pizzeria
+                      SELECT Pizzen.Name, Zutaten.Bezeichnung
+		FROM Pizzen, Zutaten, Pizza_Zutat
+		WHERE Pizzen.PizzaID=Pizza_Zutat.PizzaID AND
+		Zutaten.ZutatenID=Pizza_Zutat.ZutatenID AND
+		Pizzen.Name LIKE 'M%'
+		
+		
+		
+		Select Pizzen.Name, Zutaten.Bezeichnung
+		FROM Pizzen INNER JOIN Pizza_Zutat ON Pizzen.PizzaID=Pizza_Zutat.PizzaID
+				  INNER JOIN Zutaten ON Zutaten.ZutatenID=Pizza_Zutat.ZutatenID
+				
+				
+		Select Kunden.Name
+		FROM Kunden INNER JOIN Bestellungen ON Kunden.TelefonNR=Bestellungen.KundenNR_FK
+		
+		-> Verknuepfen von Tabellen
+		
+		--> "Alte" Varriante der Tabellenverknuepfung ueber den WHERE-Zweig
+		
+		SELECT  Pizzen.Name, Zutaten.Bezeichnung
+		FROM Pizzen, Zutaten, Pizza_Zutat
+		WHERE Pizzen.Pizza.ID=Pizza_zutat.PizzaID AND
+		Zutaten.ZutatenID=Pizza_Zutat.ZutatenID
+		
+		--> Die selbe Abfrage mit "modernen" JOINs
+		
+		Beispiel : Hole alle Pizzen, deren Name mit M beginnt und auf welchen die Zutat Salami vorkommt.
+		
+		Select Pizzen.Name, Zutaten.Bzeichnung
+		FROM Pizzen INNER JOIN Pizza_Zutat ON Pizza.PizzaID=Pizza_Zutat.PizzaID
+			             INNER JOIN Zutaten on Zutaten.ZutatenID=Pizza_Zutat.ZutatenID
+		WHERE Pizza.Nbame LIKE 'M%' AND Zuzaten.Bezeichnung = 'Salami'
+		
+		
+	-> Der WHERE-Zweig
+	
+		- Operatoren:
+		- = , <>, !=, >,<, LIKE, BETWEEN, IN, AND,OR
+	
+	
+	Der LIKE-Operator
+	
+		% -> Alle beliebigen Zeichen(auch keine)
+		
+		_ ->  Genau ein Zueichen
+		
+		Der BETWEEN - Operator:
+		
+		  WHERE Kunden.Geburtstag BETWEEN '1978-02-20' AND ' 1980-02-20'
+		
+	--------------------------------------------------------------------
+	
+	-> ORDER BY (ASC / DSC) -> DESC=absteigend  ASC = Aufsteigend(default)
+	
+	SELECT Kunde.Schuhgroesse
+	FROM Kunden
+	WHERE Kunden.Name LIKE 'A%'
+	ORDER BY Kunden.Schuhgroesse DESC
+	
+	------------------------------------------------------------------------
+	
+	-> GROUP BY 
+	   - > Besonders interesannt und wichtig, wenn Aggregatfunktionen benutzt werden
+	           
+		
+Beispiel : 	 Hole alle Zutaten, welche auf Pizzen benutzt werden: 
+
+SELECT Pizza_Zutat.ZutatenID, Zutaten.Bezeichnung
+FROM PIZZA_Zutat INNEER JOIN Zutaten ON Pizza_Zutat.ZutatenID=Zutaten.ZutatenID
+GROUP BY Pizza.Zutat.ZutatenID, Zutaten.Bezeichnung
+
+
+-----------------------------------------------------------------------------
+
+-> Aggregatfunktionen
+
+    - COUNT, SUM, AVG, MIN, MAX
+
+     -> COUNT:
+        
+        -> Zaehle alle Nicht-NULL-Werte einer Spalte
+
+        SELECT COUNT(ArtikelID) AS AnzahlArtikel
+        FROM Bestellung_Artikel
+
+
+    -> Hier spielt NULL keine Rolle:
+
+    SELECT * COUNT (*) AS AnzahlArtikel
+    FROM Bestellung_Artikel INNER JOIN Artikel ON
+         Bestellung_Artikel.ArtikelID=Artikel.ArtikelID
+
+        
+   -> VORSICHT! -> Da hier eine Aggregatfunktionen kombiniert wird mir einer normalen Spalte, muss nach der Spalte geuppiert werden!
+    
+
+
+SELECT COUNT(*) AS AnzahlArtikel
+FROM Bestellung_Artikel INNER JOIN Artikel ON 
+     Bestellung_Artikel.Artikel.ArtikelID
+
+
+SELECT * Kunden.Name
+FROM Kunden INNER JOIN BEstellung ON Kunden.TelefonNR=Bestellungen.KundenNR_FK
+
+
+SELECT Pizzen.Name, COUNT(Pizza_Bestellung.PizzaID) AS AnzahlBestelltePizzen
+FROM Pizzen INNEER JOIN Pizza_Bestellung ON
+     Pizzen.PizzaI=Pizza_Bestellung.PizzaID
+GROUP BY Pizzen.Name
+
+
+Beispiel: Hole alle Artikel, wleche in Bestellungen mehr als 3 Mal vorommen, sortier nach Artikelname:
+
+SELECT COUNT(ArtikelID) AS AnzahlArtikel, Artikel.Name
+FROM Artikel   
+    INNER JOIN Bestellung_Artikel ON Artikel.ArtikelID=Bestellung_Artikel.ArtikelID
+WHERE COUNT(ArtikelID)>3
+GROUP BY Artikel.Name
+ORDER BY Artikel.Name
+
+
+
+-> REGEL: Da der WHERE-Zweig nach dem Abarbeiten des GROUP BY ausgefuehrt wird, kann man im WHERE die Gruppierung NICHT
+          einschraenken -> Dies geschiet immer in der HAVING-Klausel!
+
+
+
+
